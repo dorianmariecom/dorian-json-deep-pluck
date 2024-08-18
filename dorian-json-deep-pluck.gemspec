@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "dorian-json-deep-pluck"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
   s.summary = "deep pluck json based on json path"
   s.description = s.summary
   s.authors = ["Dorian Marié"]
