@@ -3,9 +3,8 @@
 Gem::Specification.new do |s|
   s.name = "dorian-json-deep-pluck"
   s.version = "0.0.1"
-  s.summary = "Evaluates some code on json-deep-pluck line of the input"
-  s.description =
-    "#{s.summary}\n\ne.g. `ls -l | json-deep-pluck \"puts it.split.first\"`"
+  s.summary = "deep pluck json based on json path"
+  s.description = s.summary
   s.authors = ["Dorian Marié"]
   s.email = "dorian@dorianmarie.com"
   s.files = ["bin/json-deep-pluck"]
@@ -13,4 +12,5 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/dorianmariecom/dorian-json-deep-pluck"
   s.license = "MIT"
   s.metadata = { "rubygems_mfa_required" => "true" }
+  s.add_dependency "json"
 end
