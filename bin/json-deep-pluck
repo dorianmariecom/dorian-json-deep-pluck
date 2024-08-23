@@ -2,37 +2,26 @@
 # frozen_string_literal: true
 
 require "dorian/arguments"
-require "dorian/to_struct"
 require "json"
 
 def deep_pluck(json, &block)
   if json.is_a?(Hash)
-    results = json.map do |key, value|
-      [
-        deep_pluck(key, &block),
-        deep_pluck(value, &block)
-      ]
-    end.flatten(1)
+    results =
+      json
+        .map do |key, value|
+          [deep_pluck(key, &block), deep_pluck(value, &block)]
+        end
+        .flatten(1)
 
     results << yield(json)
 
-    if results.compact.empty?
-      nil
-    else
-      results.compact
-    end
+    results.compact.empty? ? nil : results.compact
   elsif json.is_a?(Array)
-    results = json.map do |element|
-      deep_pluck(element, &block)
-    end
+    results = json.map { |element| deep_pluck(element, &block) }
 
     results << yield(json)
 
-    if results.compact.empty?
-      nil
-    else
-      results.compact
-    end
+    results.compact.empty? ? nil : results.compact
   else
     nil
   end
@@ -62,16 +51,15 @@ end
 
 inputs = parsed.files.map { |file| File.read(file) }
 inputs = [$stdin.each_line.to_a.map(&:strip).join("\n")] if inputs.empty?
-keys = parsed.arguments.map do |key|
-  key.to_i.to_s == key ? key.to_i : key
-end
+keys = parsed.arguments.map { |key| key.to_i.to_s == key ? key.to_i : key }
 
 inputs.each do |input|
-  result = deep_pluck(JSON.parse(input)) do |json|
-    json.is_a?(Hash) || json.is_a?(Array) ? json.dig(*keys) : nil
-  rescue TypeError
-    nil
-  end
+  result =
+    deep_pluck(JSON.parse(input)) do |json|
+      json.is_a?(Hash) || json.is_a?(Array) ? json.dig(*keys) : nil
+    rescue TypeError
+      nil
+    end
 
   if parsed.options.json
     puts JSON.pretty_generate(result)
