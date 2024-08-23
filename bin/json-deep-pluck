@@ -5,6 +5,39 @@ require "dorian/arguments"
 require "dorian/to_struct"
 require "json"
 
+def deep_pluck(json, &block)
+  if json.is_a?(Hash)
+    results = json.map do |key, value|
+      [
+        deep_pluck(key, &block),
+        deep_pluck(value, &block)
+      ]
+    end.flatten(1)
+
+    results << yield(json)
+
+    if results.compact.empty?
+      nil
+    else
+      results.compact
+    end
+  elsif json.is_a?(Array)
+    results = json.map do |element|
+      deep_pluck(element, &block)
+    end
+
+    results << yield(json)
+
+    if results.compact.empty?
+      nil
+    else
+      results.compact
+    end
+  else
+    nil
+  end
+end
+
 parsed =
   Dorian::Arguments.parse(
     json: {
@@ -34,7 +67,11 @@ keys = parsed.arguments.map do |key|
 end
 
 inputs.each do |input|
-  result = JSON.parse(input).dig(*keys)
+  result = deep_pluck(JSON.parse(input)) do |json|
+    json.is_a?(Hash) || json.is_a?(Array) ? json.dig(*keys) : nil
+  rescue TypeError
+    nil
+  end
 
   if parsed.options.json
     puts JSON.pretty_generate(result)
